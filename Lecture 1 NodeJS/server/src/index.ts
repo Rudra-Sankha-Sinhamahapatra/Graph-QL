@@ -9,29 +9,44 @@ async function startServer() {
 
   const typeDefs = `
 
-       type User {
-        id:ID!
-        name:String!
-        username:String!
-        email:String!
-        phone:String!
-        website:String!
+    type User {
+      id: ID!
+      name: String!
+      username: String!
+      email: String!
+      phone: String!
+      website: String!
     }
 
-        type Todo {
-            id: ID!
-            title: String!
-            completed: Boolean
-        }
+    type Todo {
+      id: ID!
+      title: String!
+      completed: Boolean
+      user: User
+    }
 
-        type Query {
-            getTodos: [Todo]
-            getAllUsers: [User]
-            getUserById(id:ID!):User
-        }
-    `;
+    type Query {
+      getTodos: [Todo]
+      getAllUsers: [User]
+      getUserById(id: ID!): User
+    }
+  `;
 
   const resolvers = {
+    Todo: {
+      user: async (todo: any) => {
+        try {
+          const response = await axios.get(
+            `https://jsonplaceholder.typicode.com/users/${todo.id}`
+          );
+          return response.data;
+        } catch (error) {
+          // console.error("Error fetching user:", error);
+          return null;
+        }
+      },
+    },
+
     Query: {
       getTodos: async () => {
         try {
@@ -40,7 +55,7 @@ async function startServer() {
           );
           return response.data;
         } catch (error) {
-          console.error("Error fetching todos:", error);
+          // console.error("Error fetching todos:", error);
           return [];
         }
       },
@@ -52,20 +67,20 @@ async function startServer() {
           );
           return response.data;
         } catch (error) {
-          console.error("Error fetching todos:", error);
+          // console.error("Error fetching users:", error);
           return [];
         }
       },
 
-      getUserById: async (parent:any,{id}:any) => {
+      getUserById: async (parent: any, { id }: any) => {
         try {
           const response = await axios.get(
             `https://jsonplaceholder.typicode.com/users/${id}`
           );
           return response.data;
         } catch (error) {
-          console.error("Error fetching todos:", error);
-          return [];
+          // console.error("Error fetching user:", error);
+          return null;
         }
       },
     },
